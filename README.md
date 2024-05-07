@@ -1,80 +1,77 @@
-# Домашнее задание к занятию "`Работа с данными (DDL/DML)`" - `Варфоломеева Марьяна`
+# Домашнее задание к занятию "`SQL. Часть 1`" - `Варфоломеева Марьяна`
 
 
 ### Задание 1
-1.1. Поднимите чистый инстанс MySQL версии 8.0+. Можно использовать локальный сервер или контейнер Docker.
-```bash
-sudo docker run --name mysql-docker -p 3306:3306 -e MYSQL_ROOT_PASSWORD=pass -d mysql:8.0
-sudo docker exec -it mysql-docker bash
-mysql -u root -p
+Получите уникальные названия районов из таблицы с адресами, которые начинаются на “K” и заканчиваются на “a” и не содержат пробелов.
+
+```SQL
+select DISTINCT a.district  from address a 
+where a.district  like 'K%a' 
+and a.district  not like '% %'
 ```
-1.2. Создайте учётную запись sys_temp. 
-```sql
-CREATE USER 'sys_temp'@'localhost' IDENTIFIED BY 'password';
-```
-
-1.3. Выполните запрос на получение списка пользователей в базе данных. 
-![Список пользователей](https://github.com/Maryana101/DDL-DML-hw/blob/main/img/2.select_user.png)
-
-1.4. Дайте все права для пользователя sys_temp. 
-```sql
-GRANT ALL PRIVILEGES ON *.* TO 'sys_temp'@'localhost';
-```
-1.5. Выполните запрос на получение списка прав для пользователя sys_temp. (скриншот)
-![Права пользователя](https://github.com/Maryana101/DDL-DML-hw/blob/main/img/3.show_grants.png)
-
-1.6. Переподключитесь к базе данных от имени sys_temp.
-
-```bash
-mysql -u sys_temp -p
-```
-Для смены типа аутентификации с sha2 используйте запрос: 
-```sql
-ALTER USER 'sys_temp'@'localhost' IDENTIFIED WITH mysql_native_password BY 'pass';
-```
-1.6. По ссылке https://downloads.mysql.com/docs/sakila-db.zip скачайте дамп базы данных.
-
-1.7. Восстановите дамп в базу данных.
-
-Дамп восстановлен через интерфейс dBeaver:
-
-![Импорт БД](https://github.com/Maryana101/DDL-DML-hw/blob/main/img/5.dump_db.png)
-
-1.8. При работе в IDE сформируйте ER-диаграмму получившейся базы данных. При работе в командной строке используйте команду для получения всех таблиц базы данных. (скриншот)
-
-![Структура БД](https://github.com/Maryana101/DDL-DML-hw/blob/main/img/4.ER-diagramm.png)
-
----
+![1](https://github.com/Maryana101/SQl-1-hw/tree/main/img/1_SQL.png)
 
 ### Задание 2
+Получите из таблицы платежей за прокат фильмов информацию по платежам, которые выполнялись в промежуток с 15 июня 2005 года по 18 июня 2005 года включительно и стоимость которых превышает 10.00.
 
-Составьте таблицу, используя любой текстовый редактор или Excel, в которой должно быть два столбца: в первом должны быть названия таблиц восстановленной базы, во втором названия первичных ключей этих таблиц. Пример: (скриншот/текст)
+```SQL
+select p.payment_date, p.amount 
+from payment p 
+where date(p.payment_date) BETWEEN  '2005-06-15' and '2005-06-18'
+and p.amount > 10
 ```
-Название таблицы | Название первичного ключа
-customer         | customer_id
-```
-
-Запрос на вывод таблиц с PK:
-```sql
-SELECT pk.TABLE_NAME , C.COLUMN_NAME 
-FROM information_schema.TABLE_CONSTRAINTS  AS pk
-join information_schema.KEY_COLUMN_USAGE AS C ON
-  C.TABLE_NAME = pk.TABLE_NAME AND
-  C.CONSTRAINT_NAME = pk.CONSTRAINT_NAME AND
-  C.TABLE_SCHEMA = pk.TABLE_SCHEMA
-WHERE  pk.TABLE_SCHEMA = 'sakila'
-  AND pk.CONSTRAINT_TYPE = 'PRIMARY KEY';
-```
-
-![список таблиц](https://github.com/Maryana101/DDL-DML-hw/blob/main/img/6.tables.png)
+![2](https://github.com/Maryana101/SQl-1-hw/tree/main/img/2_SQL.png)
 
 ### Задание 3
+Получите последние пять аренд фильмов.
 
-3.1. Уберите у пользователя sys_temp права на внесение, изменение и удаление данных из базы sakila.
-```sql
-REVOKE INSERT, UPDATE, DELETE ON sakila.* FROM 'sys_temp';
+```SQL
+select f.title , r.rental_date  from rental r 
+join inventory i on r.rental_id =i.inventory_id 
+join film f on f.film_id =i.film_id 
+order by r.rental_date  desc
+limit 5
 ```
+![3](https://github.com/Maryana101/SQl-1-hw/tree/main/img/3_SQL.png)
 
-3.2. Выполните запрос на получение списка прав для пользователя sys_temp. (скриншот)
+### Задание 4
+Одним запросом получите активных покупателей, имена которых Kelly или Willie.
 
-![новые права](https://github.com/Maryana101/DDL-DML-hw/blob/main/img/7.NEW_GRANTS.png)
+
+Сформируйте вывод в результат таким образом:
+- все буквы в фамилии и имени из верхнего регистра переведите в нижний регистр,
+- замените буквы 'll' в именах на 'pp'.
+
+
+```SQL
+select replace(lower(c.first_name), 'll','pp') as first_name , 
+	   lower(c.last_name)  as last_name
+from customer c 
+where c.active =1
+and c.first_name  in ('Kelly', 'Willie')
+```
+![4](https://github.com/Maryana101/SQl-1-hw/tree/main/img/4_SQL.png)
+
+### Задание 5
+Выведите Email каждого покупателя, разделив значение Email на две отдельных колонки: в первой колонке должно быть значение, указанное до @, во второй — значение, указанное после @.
+
+```SQL
+select 
+SUBSTR(c.email,1, INSTR(c.email, '@')-1) as user_name,
+SUBSTR(c.email, INSTR(c.email, '@')+1, LENGTH(c.email)) as domain
+from customer c ;
+```
+![5](https://github.com/Maryana101/SQl-1-hw/tree/main/img/5_SQL.png)
+
+### Задание 6
+Доработайте запрос из предыдущего задания, скорректируйте значения в новых колонках: первая буква должна быть заглавной, остальные — строчными.
+```SQL
+select 
+    CONCAT(UPPER(LEFT(SUBSTRING_INDEX(c.email, '@', 1), 1)), 
+           LOWER(SUBSTRING(SUBSTRING_INDEX(c.email, '@', 1), 2))) as user_name, 
+    CONCAT(UPPER(LEFT(SUBSTRING_INDEX(c.email, '@', -1), 1)),
+          LOWER(SUBSTRING(SUBSTRING_INDEX(c.email, '@', -1), 2))) as domain
+FROM customer c;
+```
+![6](https://github.com/Maryana101/SQl-1-hw/tree/main/img/6_SQL.png)
+
