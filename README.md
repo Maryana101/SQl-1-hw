@@ -9,6 +9,7 @@ select DISTINCT a.district  from address a
 where a.district  like 'K%a' 
 and a.district  not like '% %'
 ```
+
 ![Скриншот-1](https://github.com/Maryana101/SQl-1-hw/tree/main/img/1_SQL.png)
 
 ### Задание 2
