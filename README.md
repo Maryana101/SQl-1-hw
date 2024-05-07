@@ -51,7 +51,7 @@ from customer c
 where c.active =1
 and c.first_name  in ('Kelly', 'Willie')
 ```
-![4](hhttps://github.com/Maryana101/SQl-1-hw/blob/main/img/4_SQL.png)
+![4](https://github.com/Maryana101/SQl-1-hw/blob/main/img/4_SQL.png)
 
 ### Задание 5
 Выведите Email каждого покупателя, разделив значение Email на две отдельных колонки: в первой колонке должно быть значение, указанное до @, во второй — значение, указанное после @.
